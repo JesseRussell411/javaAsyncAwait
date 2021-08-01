@@ -5,6 +5,10 @@
  */
 package main;
 
+import asynchronous.GenericAsync;
+import asynchronous.Task;
+import asynchronous.Promise;
+
 /**
  *
  * @author jesse
