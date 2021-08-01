@@ -23,8 +23,8 @@ public class Task<T>{
     public Promise<T> run(){
         if (!started){
             work.get().then((r) -> { resolve.accept(r); });
-            started = true;
         }
+        started = true;
         return promise;
     }
     

@@ -4,14 +4,16 @@
  * and open the template in the editor.
  */
 package main;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.function.*;
 /**
  *
  * @author jesse
  */
 public class Promise<T> {
+    private Function<T, T> nextFunc = null;
     private Promise<T> nextPromise = null;
-    private Function<T, T> nextTask = null;
     private T result;
     private boolean resolved = false;
     public boolean isResolved() { return resolved; }
@@ -24,13 +26,16 @@ public class Promise<T> {
     }
     
     private void runNextTask(){
-        if (nextTask != null){
-            nextPromise.resolve(nextTask.apply(result));
+        if (nextFunc != null){
+            nextPromise.resolve(nextFunc.apply(result));
         }
     }
     
     public Promise<T> then(Function<T, T> func){
-        nextTask = func;
+        if (nextFunc != null){
+            return nextPromise.then(func);
+        }
+        nextFunc = func;
         nextPromise = new Promise<>();
         if (resolved) { runNextTask(); }
         return nextPromise;
