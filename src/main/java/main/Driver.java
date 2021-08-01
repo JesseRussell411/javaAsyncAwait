@@ -15,17 +15,29 @@ public class Driver {
         return new Promise<String>((resolve) -> 
             new Thread(() -> {
                 try{
-                        Thread.sleep(100000);
+                        Thread.sleep(100);
                 } catch(InterruptedException e) { }
                 resolve.accept("hello");
                     }).start());
             
-        }
+    }
     static Promise<String> getSpace(){
-        return new Promise<String>((resolve) -> { resolve.accept(" "); });
+        return new Promise<String>((resolve) -> 
+            new Thread(() -> {
+                try{
+                        Thread.sleep(10);
+                } catch(InterruptedException e) { }
+                resolve.accept(" ");
+                    }).start());
     }
     static Promise<String> getWorld() {
-        return new Promise<String>((resolve) -> { resolve.accept("world"); });
+        return new Promise<String>((resolve) -> 
+            new Thread(() -> {
+                try{
+                        Thread.sleep(200);
+                } catch(InterruptedException e) { }
+                resolve.accept("world");
+                    }).start());
     }
     static Promise<String> getSpaceWorld(){
         return new Promise<String>((resolve) -> resolve.accept(async.await(() -> getSpace()) + async.await(() -> getWorld())));
