@@ -10,8 +10,16 @@ package main;
  * @author jesse
  */
 public class Driver {
+    
+    static Task<String> Fetch(String url){
+        return new Task<String>(new Promise((resolve) -> {
+            // send request:
+            // something something something(url, callback=resolve)
+        }));
+    }
+    
     static AsyncController<String> async = new AsyncController<>();
-    static Promise<String> getHello(){
+    static  Promise<String> getHello(){
         return new Promise<String>((resolve) -> 
             new Thread(() -> {
                 try{
@@ -34,7 +42,7 @@ public class Driver {
         return new Promise<String>((resolve) -> 
             new Thread(() -> {
                 try{
-                        Thread.sleep(200);
+                        Thread.sleep(2000);
                 } catch(InterruptedException e) { }
                 resolve.accept("world");
                     }).start());
