@@ -14,20 +14,15 @@ import asynchronous.Promise;
  * @author jesse
  */
 public class Driver {
-    static Task<String> Fetch(String url){
-        return new Task<String>(new Promise((resolve) -> {
-            // send request:
-            // something something something(url, callback=resolve)
-        }));
-    }
-    
     static GenericAsync async = new GenericAsync();
+    
     static  Promise<String> getHello(){
         return new Promise<String>((resolve) -> 
             new Thread(() -> {
                 try{
-                        Thread.sleep(100);
+                        Thread.sleep(800);
                 } catch(InterruptedException e) { }
+                System.out.println("got hello");
                 resolve.accept("hello");
                     }).start());
             
@@ -36,8 +31,9 @@ public class Driver {
         return new Promise<String>((resolve) -> 
             new Thread(() -> {
                 try{
-                        Thread.sleep(10);
+                        Thread.sleep(700);
                 } catch(InterruptedException e) { }
+                System.out.println("got space");
                 resolve.accept(" ");
                     }).start());
     }
@@ -45,8 +41,9 @@ public class Driver {
         return new Promise<String>((resolve) -> 
             new Thread(() -> {
                 try{
-                        Thread.sleep(200);
+                        Thread.sleep(700);
                 } catch(InterruptedException e) { }
+                System.out.println("got world");
                 resolve.accept("world");
                     }).start());
     }
@@ -56,6 +53,7 @@ public class Driver {
                 try{
                         Thread.sleep(500);
                 } catch(InterruptedException e) { }
+                System.out.println("got one");
                 resolve.accept(1);
                     }).start());
     }
@@ -65,6 +63,7 @@ public class Driver {
                 try{
                         Thread.sleep(500);
                 } catch(InterruptedException e) { }
+                System.out.println("got two");
                 resolve.accept(2);
                     }).start());
     }
@@ -95,7 +94,16 @@ public class Driver {
         prom.then((r) -> {System.out.println(r);});
         
         async.later(() -> new Promise<Object>((resolve) -> {
-            System.out.println(async.await(() -> getHello()) + async.await(() -> getSpaceWorld()) + "!" + async.await(() -> complicatedGetOne()));
+            final var helloPromise = async.later(() -> getHello());
+            final var spaceWorldPromise = async.later(() -> getSpaceWorld());
+            final var onePromise = async.later(() -> complicatedGetOne());
+            
+            final var hello = async.await(helloPromise);
+            final var spaceWorld = async.await(spaceWorldPromise);
+            final var one = async.await(onePromise);
+            
+            System.out.println(hello + spaceWorld + "!" + one);
+            
             resolve.accept(null);
         }));
         System.out.println("goodbye world");
