@@ -5,7 +5,7 @@
  */
 package asynchronous;
 import java.util.Queue;
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.*;
 
 /**
@@ -15,7 +15,7 @@ import java.util.function.*;
 public class AsyncController<T> {
     private final static long LISTENER_TIMEOUT_MILLISECONDS = 1;
     private final static int LISTENER_TIMEOUT_NANOSECONDS = 0;
-    private Queue<Task<T>> executionQueue = new LinkedList<>();
+    private final Queue<Task<T>> executionQueue = new ConcurrentLinkedQueue<>();
     
     public Promise<T> later(Task<T> task){
         executionQueue.add(task);
@@ -28,19 +28,25 @@ public class AsyncController<T> {
         return later(new Task<T>(outsideWork));
     }
     public T await(Task<T> task) {
-        var promise = later(task);
-        while(!promise.isResolved()){
-            if (!executionQueue.isEmpty()){
-                executionQueue.poll().run();
-            }
-            else{
-                try{
-                    Thread.sleep(LISTENER_TIMEOUT_MILLISECONDS, LISTENER_TIMEOUT_NANOSECONDS);
+            var promise = later(task);
+            while(!promise.isResolved()){
+                boolean isEmpty;
+                synchronized(this){
+                    if (!(isEmpty = executionQueue.isEmpty())){
+                        executionQueue.poll().run();
+                    }
                 }
-                catch(InterruptedException e){}
-            }
+                
+                if (isEmpty) {
+                    try{
+                        Thread.sleep(LISTENER_TIMEOUT_MILLISECONDS, LISTENER_TIMEOUT_NANOSECONDS);
+                    } catch(InterruptedException e) {
+                        System.exit(1);
+                    }
+                }
+
         }
-        return promise.getResult();
+            return promise.getResult();
     }
     public T await(Supplier<Promise<T>> work){
         return await(new Task<T>(work));
@@ -49,9 +55,11 @@ public class AsyncController<T> {
         return await(new Task<T>(outsideWork));
     }
     
-    public void execute(){
-        while(!executionQueue.isEmpty()){
-            executionQueue.poll().run();
+    public  void execute(){
+        synchronized(this){
+            while(!executionQueue.isEmpty()){
+                executionQueue.poll().run();
+            }
         }
     }
 }

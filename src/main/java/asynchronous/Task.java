@@ -20,7 +20,7 @@ public class Task<T>{
     public boolean isComplete() { return promise.isResolved(); }
     public boolean isWorking() { return started && !isComplete(); }
     
-    public Promise<T> run(){
+    public synchronized Promise<T> run(){
         if (!started){
             work.get().then((r) -> { resolve.accept(r); });
         }

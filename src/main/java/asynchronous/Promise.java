@@ -4,8 +4,6 @@
  * and open the template in the editor.
  */
 package asynchronous;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.function.*;
 /**
  *
@@ -31,7 +29,7 @@ public class Promise<T> {
         }
     }
     
-    public Promise<T> then(Function<T, T> func){
+    public synchronized Promise<T> then(Function<T, T> func){
         // If then has already been called on this promise, call on the nextPromise instead.
         if (nextFunc != null){
             // This way, the func given will get called after the next one completes.
@@ -48,27 +46,27 @@ public class Promise<T> {
         return nextPromise;
     }
     
-    public Promise<T> then(Consumer<T> func){
+    public synchronized Promise<T> then(Consumer<T> func){
         return then((r) -> {
             func.accept(r);
             return result;
         });
     }
     
-    public Promise<T> then(Runnable func) {
+    public synchronized Promise<T> then(Runnable func) {
         return then((r) -> {
             func.run();
             return result;
         });
     }
     
-    public Promise<T> then(Supplier<T> func) {
+    public synchronized Promise<T> then(Supplier<T> func) {
         return then((r) -> {
             return func.get();
         });
     }
     
-    private void resolve(T result){
+    private synchronized void resolve(T result){
         // cancel if this promise has already been resolved.
         if (resolved) {return;}
         
