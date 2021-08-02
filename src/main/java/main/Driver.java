@@ -94,15 +94,12 @@ public class Driver {
         prom.then((r) -> {System.out.println(r);});
         
         async.later(() -> new Promise<Object>((resolve) -> {
-            final var helloPromise = async.later(() -> getHello());
-            final var spaceWorldPromise = async.later(() -> getSpaceWorld());
-            final var onePromise = async.later(() -> complicatedGetOne());
+            final var hello = async.later(() -> getHello());
+            final var spaceWorld = async.later(() -> getSpaceWorld());
+            final var one = async.later(() -> complicatedGetOne());
             
-            final var hello = async.await(helloPromise);
-            final var spaceWorld = async.await(spaceWorldPromise);
-            final var one = async.await(onePromise);
             
-            System.out.println(hello + spaceWorld + "!" + one);
+            System.out.println(async.await(hello) + async.await(spaceWorld) + "!" + async.await(one));
             
             resolve.accept(null);
         }));
