@@ -90,7 +90,9 @@ public class Driver {
         }
         ));
         prom.then((r) -> {System.out.println(r);});
-        prom.then((r) -> {System.out.println(r.toUpperCase());});
+        prom.then((r) -> {System.out.println(r.toUpperCase()); return r.toLowerCase();});
+        prom.then((r) -> r + "and then what?");
+        prom.then((r) -> {System.out.println(r);});
         
         async.later(() -> new Promise<Object>((resolve) -> {
             System.out.println(async.await(() -> getHello()) + async.await(() -> getSpaceWorld()) + "!" + async.await(() -> complicatedGetOne()));

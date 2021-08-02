@@ -13,8 +13,8 @@ import java.util.function.*;
 public class Task<T>{
     private Supplier<Promise<T>> work;
     private Consumer<T> resolve;
-    private boolean started = false;
     private Promise<T> promise;
+    private boolean started = false;
     public Promise<T> getPromise() { return promise; }
     public boolean hasStarted() { return started; }
     public boolean isComplete() { return promise.isResolved(); }
