@@ -17,8 +17,8 @@ import java.util.Random;
 public class Driver {
     static GenericAsync async = new GenericAsync();
     static Random rand = new Random();
-    static int maxSleep = 1;
-    static int maxSleepNano = 10;
+    static int maxSleep = 1000;
+    static int maxSleepNano = 1;
     
     static  Promise<String> getHello(){
         return new Promise<String>((resolve) -> 
@@ -84,43 +84,43 @@ public class Driver {
     
     public static void main(String[] args) {
         while(true){
-        final var prom = async.later(() -> new Promise<String>(
-            resolve -> {
-                System.out.println("Started quick brown fox.");
-                new Thread(() -> {
-                    try{
-                        Thread.sleep(maxSleep, maxSleepNano);
-                    } catch(InterruptedException e) {}
-                    
-                    
-                    async.await(() -> getOne());
-                    async.await(() -> getTwo());
-                    async.later(() -> complicatedGetOne());
-                    
-                    
-                    resolve.accept("The quick brown fox jumps over the lazy dog.");
-                }).start();
-            }
-        ));
-        prom.then((r) -> {System.out.println(r);});
-        prom.then((r) -> {System.out.println(r.toUpperCase()); return r.toLowerCase();});
-        prom.then((r) -> r + "and then what?");
-        prom.then((r) -> {System.out.println(r);});
-        
-        
-        async.later(() -> new Promise<Object>((resolve) -> {
-            final var hello = async.later(() -> getHello());
-            final var spaceWorld = async.later(() -> getSpaceWorld());
-            final var one = async.later(() -> complicatedGetOne());
-            
-            
-            System.out.println(async.await(hello) + async.await(spaceWorld) + "!" + async.await(one));
-            
-            resolve.accept(null);
-        }));
-        System.out.println("goodbye world");
-        
-        async.execute();
+            final var prom = async.later(() -> new Promise<String>(
+                resolve -> {
+                    System.out.println("Started quick brown fox.");
+                    new Thread(() -> {
+                        try{
+                            Thread.sleep(maxSleep, maxSleepNano);
+                        } catch(InterruptedException e) {}
+
+
+                        async.await(() -> getOne());
+                        async.later(() -> complicatedGetOne());
+                        async.await(() -> getTwo());
+
+
+                        resolve.accept("The quick brown fox jumps over the lazy dog.");
+                    }).start();
+                }
+            ));
+            prom.then((r) -> {System.out.println(r);});
+            prom.then((r) -> {System.out.println(r.toUpperCase()); return r.toLowerCase();});
+            prom.then((r) -> r + "and then what?");
+            prom.then((r) -> {System.out.println(r);});
+
+
+            async.later(() -> new Promise<Object>((resolve) -> {
+                final var hello = async.later(getHello());
+                final var spaceWorld = async.later(getSpaceWorld());
+                final var one = async.later(complicatedGetOne());
+
+
+                System.out.println(async.await(hello) + async.await(spaceWorld) + "!" + async.await(one));
+
+                resolve.accept(null);
+            }));
+            System.out.println("goodbye world");
+
+            async.execute();
         }
     }
 }

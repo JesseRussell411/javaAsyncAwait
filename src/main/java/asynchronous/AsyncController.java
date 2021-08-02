@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package asynchronous;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.*;
@@ -28,22 +29,19 @@ public class AsyncController<T> {
         return later(new Task<T>(outsideWork));
     }
     public T await(Task<T> task) {
-            var promise = later(task);
-            while(!promise.isResolved()){
-                boolean isEmpty;
-                synchronized(this){
-                    if (!(isEmpty = executionQueue.isEmpty())){
-                        executionQueue.poll().run();
-                    }
+        var promise = later(task);
+        while(!promise.isResolved()){
+            Task<T> job = executionQueue.poll();
+            if (job != null){
+                job.run();
+            }
+            else {
+                try{
+                    Thread.sleep(LISTENER_TIMEOUT_MILLISECONDS, LISTENER_TIMEOUT_NANOSECONDS);
+                } catch(InterruptedException e) {
+                    System.exit(1);
                 }
-                
-                if (isEmpty) {
-                    try{
-                        Thread.sleep(LISTENER_TIMEOUT_MILLISECONDS, LISTENER_TIMEOUT_NANOSECONDS);
-                    } catch(InterruptedException e) {
-                        System.exit(1);
-                    }
-                }
+            }
 
         }
             return promise.getResult();
@@ -54,11 +52,18 @@ public class AsyncController<T> {
     public T await(Promise<T> outsideWork){
         return await(new Task<T>(outsideWork));
     }
-    
-    public  void execute(){
-        synchronized(this){
-            while(!executionQueue.isEmpty()){
-                executionQueue.poll().run();
+    private Object executeLock = new Object();
+    public void execute(){
+        synchronized(executeLock){
+            Queue<Task<T>> jobs = new LinkedList<Task<T>>();
+            Task<T> job;
+            while((job = executionQueue.poll()) != null){
+                job.run();
+                jobs.add(job);
+            }
+
+            while((job = jobs.poll()) != null){
+                await(job);
             }
         }
     }
