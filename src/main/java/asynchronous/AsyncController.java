@@ -39,12 +39,11 @@ public class AsyncController<T> {
                 try{
                     Thread.sleep(LISTENER_TIMEOUT_MILLISECONDS, LISTENER_TIMEOUT_NANOSECONDS);
                 } catch(InterruptedException e) {
-                    System.exit(1);
+                    throw new AsyncInterruptedException(e);
                 }
             }
-
         }
-            return promise.getResult();
+        return promise.getResult();
     }
     public T await(Supplier<Promise<T>> work){
         return await(new Task<T>(work));

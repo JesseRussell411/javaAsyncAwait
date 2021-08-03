@@ -84,7 +84,7 @@ public class Driver {
     
     public static void main(String[] args) {
         while(true){
-            final var prom = async.later(() -> new Promise<String>(
+            final var prom = async.later(new Promise<String>(
                 resolve -> {
                     System.out.println("Started quick brown fox.");
                     new Thread(() -> {
